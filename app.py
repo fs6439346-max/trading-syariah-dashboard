@@ -1,10 +1,9 @@
-
 import streamlit as st
 import yfinance as yf
 import pandas as pd
 import ta
 
-st.set_page_config(page_title="Dashboard Robot Trading Syariah - ChanLun & Fundamental", layout="wide")
+st.set_page_config(page_title="Dashboard Robot Trading Syariah - ChanLun & Fundamental")
 st.title("📈 Dashboard Robot Trading Syariah - ChanLun & Fundamental")
 
 # Input saham
@@ -14,10 +13,15 @@ if ticker:
     try:
         data = yf.download(ticker, period="6mo", interval="1d")
 
-        if not data.empty and 'Close' in data.columns and not data['Close'].isnull().all():
+        if (
+            data is not None
+            and not data.empty
+            and 'Close' in data.columns
+            and isinstance(data['Close'], pd.Series)
+            and not data['Close'].dropna().empty
+        ):
             close_series = data['Close'].squeeze()
             data['MA20'] = ta.trend.sma_indicator(close_series, window=20)
-
             st.line_chart(data[['Close', 'MA20']].dropna())
         else:
             st.warning("Data harga penutupan (Close) tidak tersedia atau kosong.")
